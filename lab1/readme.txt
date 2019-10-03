@@ -14,3 +14,18 @@ Index: names.txt
 @@ -1 +1 @@
 -Miller
 +Alex Miller
+Index: names.txt
+===================================================================
+--- names.txt	(revision 7)
++++ names.txt	(revision 8)
+@@ -1 +1 @@
+-Miller
++Alex Miller
+ndex: names.txt
+===================================================================
+--- names.txt	(revision 8)
++++ names.txt	(working copy)
+@@ -1 +1 @@
+-Alex Miller
++Miller
+
