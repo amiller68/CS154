@@ -1,13 +1,18 @@
-main: bar.o foo.o
-	gcc -Wall bar.o foo.o -o main
+cc = gcc
+CFLAGS = -Wall
+OBJS = bar.o foo.o
+RM = rm
+
+main: $(OBJS)
+	$(cc) $(CFLAGS) $(OBJS) -o main
 
 bar.o: bar.c bar.h
-	gcc -Wall -c bar.c -o bar.o
+	$(cc) $(CFLAGS) -c bar.c -o bar.o
 
 foo.o: foo.c foo.h bar.h
-	gcc -Wall -c foo.c -o foo.o
+	$(cc) $(CFLAGS) -c foo.c -o foo.o
 
 clean:
-	rm -f foo.o bar.o main
+	$(RM) -f $(OBJS) main
 
 
