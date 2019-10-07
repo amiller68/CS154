@@ -1,0 +1,31 @@
+Homework 1
+1.1)
+	Main Answer:
+	foo = 1 << 8*(sizeof(int)-1);
+	endian = *(char*) &foo;
+
+	Reasoning:
+	Regardless of word size, the first byte of foo in memory is:
+	0 0 0 0 0 0 0 1
+	in Big Endian machines and:
+	0 0 0 0 0 0 0 0
+	in Little Endian machines.
+	This is true because integers are made of of mutliple (read as >1) bytes.
+	My defintion of endian takes that first byte by accessing it's memory 
+	address (accessed by referencing foo), reads it as a char pointer (type cast),
+	and then dereferences it, therefore giving the char value held in the first
+	byte of memory. In C, when chars are assigned to ints, they are converted to
+	the decimal value held in the char. For Big-Endian machines this code gives
+	endian a value of 1. For Lil-Endian machines it assigns 0.
+
+1.2)
+	a. !!~x;
+	b. x && 1;
+	c. !!~(x | (~(1 << (8*sizeof(x) - 1)) >> 3));
+	d. (x & -16) && 1;
+	e. (x & (1 << (8*sizeof(x) - 1))) == (x << (8*sizeof(x) - 1));
+	f. (x & 0x55555555) && 1;
+
+
+	
+ 
