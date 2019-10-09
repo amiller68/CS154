@@ -113,6 +113,8 @@ NOTES:
 
 #endif
 
+#include <limits.h>
+
 /************************************************ 
  * absVal - absolute value of x
  *   Example: absVal(-1) = 1.
@@ -122,7 +124,8 @@ NOTES:
  *   Rating: 4
  */
 int absVal(int x) {
-  return 2;
+  int sign = x >> 31;
+  return (x ^ sign) - sign;
 }
 
 /************************************************ 
@@ -134,7 +137,13 @@ int absVal(int x) {
  *   Rating: 3
  */
 int addOK(int x, int y) {
-  return 2;
+	int mx, my, res, mres, diff;
+	mx = x >> 31;
+	my = y >> 31;
+	diff = !~(my ^ mx);
+	res = x + y;
+	mres = res >> 31;
+	return diff | (!(mres ^ my));
 }
 
 /************************************************ 
@@ -145,7 +154,13 @@ int addOK(int x, int y) {
  *   Rating: 2
  */
 int allEvenBits(int x) {
-  return 2;
+	int even, odd;
+	even = 0x55;
+	even += even << 8;
+	even += even << 16;
+	x = even ^ x;
+	x = even & x;
+	return !x; 
 }
 
 /************************************************
@@ -156,7 +171,7 @@ int allEvenBits(int x) {
  *   Rating: 4 
  */
 int bang(int x) {
-  return 2;
+  return (((x >> 31) | (~x +1)) >> 31) + 1;
 }
 
 /************************************************
@@ -167,7 +182,22 @@ int bang(int x) {
  *   Rating: 4
  */
 int bitCount(int x) {
-  return 2;
+	int count, mask;
+	mask = 1;
+	mask += mask << 8;
+	mask += mask << 16;
+	count  = x & mask;
+	count += (x & (mask << 1)) >> 1;
+	count += (x & (mask << 2)) >> 2;
+	count += (x & (mask << 3)) >> 3;
+	count += (x & (mask << 4)) >> 4;
+	count += (x & (mask << 5)) >> 5;
+	count += (x & (mask << 6)) >> 6;
+	count += mask & ((x & (mask << 7)) >> 7);
+	count += count >> 16;
+	count += count >> 8;
+	return count & 255;
+	  
 }
 
 /************************************************
@@ -178,7 +208,7 @@ int bitCount(int x) {
  *   Rating: 1
  */
 int bitNor(int x, int y) {
-  return 2;
+  return (~x & ~y);
 }
 
 /************************************************
@@ -191,7 +221,19 @@ int bitNor(int x, int y) {
  *  Rating: 2
  */
 int byteSwap(int x, int n, int m) {
-  return 2;
+    int nth, mth;
+	int a, b;
+	nth = 255 << (n << 3);
+	mth = 255 << (m << 3);
+	a = x & nth;
+	b = x & mth;
+    a = 255 & (a >> (n << 3));
+	b = 255 & (b >> (m << 3));
+    a = (a << (m << 3));
+	b = (b << (n << 3));
+	x = x & ~(nth | mth);
+	x = x | (a | b);
+	return x;
 }
 
 /************************************************ 
@@ -202,7 +244,12 @@ int byteSwap(int x, int n, int m) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  return 2;
+  int boolean, cond;
+  boolean = !!x;
+  cond = (~boolean+1);
+  y &= cond;
+  z &= ~cond;
+  return y | z;
 }
 
 /************************************************
@@ -217,7 +264,13 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int ezThreeFourths(int x) {
-  return 2;
+  int mask, rem;
+  x = (x << 1) + x;
+  mask = x >> 31;
+  rem = mask & 3;	
+  x += rem;
+  x = x >> 2;
+  return x;
 }
 
 /************************************************ 
@@ -242,7 +295,12 @@ int fitsBits(int x, int n) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
-  return 2;
+  int byte, shift;
+  shift = n << 3;
+  byte =  255 << shift;
+  byte = byte & x;
+  byte = byte >> shift;
+  return byte & 255;
 }
 
 /************************************************ 
@@ -267,7 +325,7 @@ int greatestBitPos(int x) {
  *   Rating: 2
  */
 int implication(int x, int y) {
-  return 2;
+  return (!x) | y;
 }
 
 /************************************************ 
@@ -280,7 +338,16 @@ int implication(int x, int y) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
-  return 2;
+	int pos1, pos2, b1, b2;
+	pos1 = x & ~1;
+	pos2 = x & ~7;
+	b1 = 7 << 3;
+	b2 = 3 << 4;
+	pos1 = pos1 ^ b1;
+	pos1 = !pos1;
+	pos2 = pos2 ^ b2;
+	pos2 = !pos2;
+	return pos1 | pos2;
 }
 
 /************************************************ 
@@ -291,7 +358,10 @@ int isAsciiDigit(int x) {
  *   Rating: 2
  */
 int isEqual(int x, int y) {
-  return 2;
+  int a, b;
+  a = (x ^ (~y));
+  b = ~a;
+  return !b; 
 }
 
 /************************************************
@@ -302,7 +372,26 @@ int isEqual(int x, int y) {
  *   Rating: 3
  */
 int isLess(int x, int y) {
-  return 2;
+  int sub, mask, min, mx, my, max;
+  printf("x : %d\n", x);
+  printf("y : %d\n", y);
+  sub = y + (~x+1);
+//if sub != 0, return 01
+//if sub == 0, return 0
+  mx = x >> 31;
+  my = y >> 31;
+  printf("Sub : %d\n", sub);
+  mask = sub >> 31;
+  printf("mask : %d\n", mask);
+  min = 1 << 31;
+  max = min ^ y;
+  min = x ^ min;
+  printf("!Mask : %d\n", !mask);
+  printf("!!Sub : %d\n", !!sub);
+  printf("!Min : %d\n", !min);
+  printf("(!(~mx & my)) : %d\n", (!(~mx & my)));
+  return ((!mask & !!sub) | (!!sub & !min) | (!mask & !(~mx & my))) & !!max ;
+		// normal cases and tmin edges        +,-
 }
 
 /************************************************
@@ -313,7 +402,8 @@ int isLess(int x, int y) {
  *   Rating: 3
  */
 int isNonNegative(int x) {
-  return 2;
+ 	int neg = x >> 31;
+	return !!~neg;
 }
 
 /************************************************
@@ -325,6 +415,9 @@ int isNonNegative(int x) {
  *   Rating: 4
  */
 int isPower2(int x) {
+//only one bit is 1
+//not the last bit
+  printf("Test = %d\n", INT_MIN + ~0);
   return 2;
 }
 
@@ -336,7 +429,10 @@ int isPower2(int x) {
  *   Rating: 1
  */
 int isTmin(int x) {
-  return 2;
+  int a, max;
+  max = ~(1<<31);
+  a = x ^ max;
+  return !~a;
 }
 
 /************************************************
@@ -346,7 +442,7 @@ int isTmin(int x) {
  *   Rating: 1
  */
 int minusOne(void) {
-  return 2;
+  return ~0;
 }
 
 /************************************************
