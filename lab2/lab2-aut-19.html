@@ -1,0 +1,554 @@
+<?xml version="1.0"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN"
+        "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+  <title>CS 154, Autumn 2019: Lab2</title>
+  <link rel="stylesheet" type="text/css" href="classes.css" />
+  <style type="text/css">
+    dd {
+      padding-bottom: 12px;
+    }
+    li {
+      padding-bottom: 12px;
+    }
+  </style>
+
+</head>
+<body>
+
+<blockquote>
+<h1>CS 154, Autumn 2019: Lab 2</h1>
+
+<h2>Introduction</h2>
+
+By the end of this lab, you should feel comfortable using the GNU
+debugger &quot;gdb&quot; to diagnose errors in C
+programs. You will also be able to use the debugger to step through
+assembly code and inspect the registers and memory locations of a
+running program.
+
+<p>
+
+A debugger is a software tool used to inspect the execution of a
+program. Using a debugger, you can run your application in an
+environment that controls how the code runs and gives you tools to
+poke around the memory, stack, and even assembly translation of the
+program. GDB is the GNU debugger, which we will be using in this
+lab. All the features we cover are available in any other modern
+debugger you may use later.
+
+<p>
+
+Do this lab on a CSIL Linux machine. The
+programs used, gdb and gcc, have different behavior on different
+platforms.  Although we are not grading the lab, we will know that you haven't
+completed the lab by looking at your repository, and we may ask you to
+complete the lab if you are having basic problems using gdb.
+
+<p>
+
+<h2>Walkthrough</h2>
+
+These steps will work through the features of gdb that you will use
+most commonly to diagnose most problems in your code. Even if you are
+familiar with gdb from a previous course, please take the time to do
+this walkthrough.  The information here will assume that you are
+following along in your terminal, typing all the commands that are indicated
+here, and taking the time to understand the output they generate,
+as explained by the commentary here.
+
+<h4>Getting your program ready</h4>
+
+The compiled binary output from gcc is just a pile of machine code. If
+you run gdb on a raw binary from gcc with no other information
+available, gdb will be able to turn the machine code into assembly but
+will not know the mapping from the assembly back to source code
+instructions. Run the following commands to launch a program without
+compiler debugger support, just to see what that looks like. The first
+command (substituting your CnetID for <tt>CNETID</tt>) assumes that
+you've set things up as requested on
+the <a href="https://www.classes.cs.uchicago.edu/current/15400-1/svn.html">Handing
+in work for cs154</a> page.
+Note that in the following, we will prefix commands to be entered at the unix
+shell with <tt>$</tt>. 
+
+<blockquote><pre>
+$ cd ~/cs154/CNETID-cs154-aut-19/
+$ svn update
+$ cd lab2/walkthrough
+$ make
+$ gdb walkthrough
+(gdb) start
+(gdb) where
+</pre></blockquote>
+
+gdb is usually either started with no arguments or just with the name
+of the program that you will execute. Once gdb is started, the prompt
+changes to <tt>(gdb)</tt>. The <tt>start</tt> command will run the program specified and
+stop execution at the first instruction of the <tt>main</tt> function. When the
+program is stopped, the <tt>where</tt> command prints out the current stack. In
+this case, it will look something like <tt>0x080483e7 in main()</tt>. Any time
+you see a hexadecimal address (code memory locations) in the output of
+the <tt>where</tt> command next to the function name, instead of file names and
+line numbers, it means the program you are looking at was not compiled
+with debugger support enabled.
+
+<p>
+
+Within gdb, use the <tt>kill</tt> command (followed by <tt>y</tt>) to stop running
+the program so that we can rebuild with debugging support. Leave gdb
+running in that terminal window and open up a second terminal window. Since gdb can
+tell when a program has been rebuilt, you can have a separate terminal
+window in which to build and write code.
+
+<p>
+
+In the second terminal window, <tt>cd</tt>
+into <tt>lab2/walkthrough</tt>, and edit <tt>Makefile</tt> (for example
+with <tt>emacs Makefile</tt>) to add
+debugging information to the program.  To the <tt>CFLAGS</tt> variable definition, add
+the <tt>-g</tt> flag, which causes debugging information to be included in
+the compiled program.  Remake:
+
+<blockquote><pre>
+$ make clean
+$ make
+</pre></blockquote>
+
+Note that when you change compiler flags in a <tt>Makefile</tt> you will
+often need to <tt>make clean; make</tt> because <tt>make</tt> does not
+know that build targets depend on variables.
+
+<p>
+
+Back in the first terminal window, the one running gdb, enter the following commands:
+
+<blockquote><pre>
+(gdb) start
+(gdb) where
+</pre></blockquote>
+
+In response to <tt>start</tt> gdb should have printed something like
+<tt>'walkthrough' has changed; re-reading symbols</tt>, since gdb noticed
+that you re-compiled your code.
+And now, the <tt>where</tt> command will print out something like:
+<blockquote><pre>
+#0  main (argc=1, argv=0xffffdbc4) at main.c:12
+</pre></blockquote>
+That is more useful than the previous <tt>where</tt> output,
+particularly when using more advanced features of the
+debugger.
+
+<h4>Breakpoints</h4>
+
+A breakpoint is a way of telling the debugger to stop executing the
+statements of a program when a given location is reached. The
+locations can be source files with line numbers, function names, or
+literal code addresses. The following will set a few
+breakpoints in the test program:
+
+<blockquote><pre>
+(gdb) break compute
+(gdb) break main.c:32
+(gdb) break main.c:36
+</pre></blockquote>
+
+These commands will set three breakpoints: one at the entry point to
+the function compute, and one each on the lines that change the value
+of the local variable named result. Each breakpoint will be numbered
+by gdb so that you can issue commands to disable or temporarily skip a
+breakpoint by name. To see all the breakpoints currently set:
+<blockquote><pre>
+(gdb) info breakpoints
+</pre></blockquote>
+which should produce something like:
+<blockquote><pre>
+Num     Type           Disp Enb Address    What
+3       breakpoint     keep y   0x0804842f in compute at main.c:24
+4       breakpoint     keep y   0x08048446 in compute at main.c:32
+5       breakpoint     keep y   0x08048452 in compute at main.c:36
+</pre></blockquote>
+Now continue execution of the program with:
+<blockquote><pre>
+(gdb) continue
+</pre></blockquote>
+
+The program should have stopped at the beginning of
+the <tt>compute</tt> function in <tt>main.c</tt>. gdb will print
+out the reason for stopping. In this case, it prints the
+number of the corresponding breakpoint. Use the <tt>where</tt> command again:
+<blockquote><pre>
+(gdb) where
+#0  compute (i=10) at main.c:24
+#1  0x08048409 in main (argc=1, argv=0xffffdbc4) at main.c:15
+</pre></blockquote>
+This is showing that at the current (stopped) point of execution,
+there are two functions on the call stack: <tt>main</tt>, which as called <tt>compute</tt>.
+
+<p>
+
+To no longer stop at this breakpoint, disable it with the following command
+(because we should be stopped at breakpoint 3):
+<blockquote><pre>
+(gdb) disable 3
+</pre></blockquote>
+To remove all breakpoints:
+<blockquote><pre>
+(gdb) delete breakpoints
+</pre></blockquote>
+(followed by <tt>y</tt>)
+
+<p>
+
+While <tt>where</tt> shows you the current call stack, the <tt>list</tt> command
+will show you the line of code currently being executed and five lines
+of context in each direction. You can provide different arguments to
+list to see different parts of source files (use <tt>help list</tt> for more
+examples).
+<blockquote><pre>
+(gdb) list
+</pre></blockquote>
+After hitting a breakpoint, you can continue the program again until
+another breakpoint is hit or the program terminates. Alternatively,
+there are commands for controlling execution with finer
+granularity. The following are the three you will use most often:
+<ul>
+<li> <tt>step</tt> executes to the next line of source code (no matter how many expressions are in the current one!). It moves line by line through any part of your program. Note that the next line may be within a function you are calling on the current line; in this sense, you "step in" to function calls.
+<li> <tt>next</tt> executes to the next source line in this function or to the end of this function. It is used when you are debugging an individual function and
+don't care about any calls to other functions. Note that you can think of this version as "stepping over" function calls. (To be clear, the function call still gets executed, but you will next see the state of the program after it returns.)
+<li> <tt>finish</tt> executes to the end of this function.
+It is used when you are done looking at a function call and want to finish it off
+and return to the caller (or when you accidentally "step" when you mean to "next").
+</ul>
+Try using <tt>step</tt> and <tt>next</tt> a few times, and then
+<blockquote><pre>
+(gdb) finish
+</pre></blockquote>
+Type <tt>continue</tt> when you are done to execute to the end of the program;
+this will produce something like
+<blockquote><pre>
+Continuing.
+0
+[Inferior 1 (process 10672) exited normally]
+</pre></blockquote>
+Note that you will remain in the debugger even after the program exits.
+
+<h4>Inspecting data</h4>
+
+Of course, just executing and breaking in the program to see where
+control flows isn't very useful. Instead of relying on <tt>printf</tt>
+statements and recompilation to show values, the debugger offers a
+powerful set of tools for inspecting variable, register, and memory
+values.
+
+<p>
+
+Following the steps above, you can start running the program again with:
+<blockquote><pre>
+(gdb) start
+</pre></blockquote>
+Or if you've quit <tt>gdb</tt> for some reason, you can restart with
+<blockquote><pre>
+$ gdb walkthrough
+(gdb) start
+</pre></blockquote>
+
+Execution should now be stopped at the first line inside <tt>main</tt>,
+just before the variable initialization occurs. Type:
+<blockquote><pre>
+(gdb) info locals
+</pre></blockquote>
+This will list all local variables and their values.
+If this were a C++ method, it would include the <tt>this</tt> pointer as well.
+Note that if any of the variables have a value of &quot;<tt>value
+temporarily unavailable, due to optimizations</tt>&quot; then you are
+running in an optimized build of the program (with <tt>-O</tt> passed
+to gcc). This likely means that the value is probably going to be
+stored in a register but has not been initialized yet. In that case,
+inspection of the assembly is necessary to understand what
+happened. More on that later.
+
+<p>
+
+Most interestingly, observe that the values of the
+variables <tt>result</tt> and <tt>i</tt> have not yet been
+initialized and contain trash data. This trash data may be zero or may be random,
+depending on the implementation of the C runtime and the state of memory.
+Do the following:
+<blockquote><pre>
+(gdb) step 2
+(gdb) info locals
+</pre></blockquote>
+The <tt>step</tt> command can be given a number for the number of
+times to step, as done here. Now, execution is about to
+proceed into the call to the <tt>compute</tt> function and both of the local
+variables have been initialized.
+
+<p>
+
+To print out a specific value you're interested in, use the <tt>print</tt> command.
+Use the following commands to step into the <tt>compute</tt> function and view
+the value of the new local variable, which is conveniently also named
+<tt>i</tt>.
+<blockquote><pre>
+(gdb) step
+(gdb) print i
+</pre></blockquote>
+If you'd like to see that value every time you step,
+so you don't have to keep typing <tt>step</tt> then <tt>print i</tt>),
+you can use <tt>display</tt> instead.
+<tt>print</tt> and <tt>display</tt> also take a simple C expression as well,
+so you can even perform some basic operations within the debugger:
+<blockquote><pre>
+(gdb) display i*2+1
+(gdb) step
+(gdb) step
+(gdb) step
+</pre></blockquote>
+Note how after the third <tt>step</tt>, you were able to see the
+value of <tt>i*2+1</tt> change from 21 to 19.
+The <tt>undisplay</tt> command turns off any display expression you have set.
+
+<h4>Watchpoints</h4>
+
+Sometimes, breakpoints are tedious. For example, you might want to
+break every time a value changes. The traditional way to see every
+time a value changes with breakpoints is to set a breakpoint on every
+line that changes the value. Instead, you can set a watchpoint on that
+specific value, and the debugger will stop any time that it is
+written.
+<blockquote><pre>
+(gdb) watch result
+(gdb) cont
+</pre></blockquote>
+The walkthrough will continue execution and run until
+the <tt>result</tt> value is updated. It will display both the previous
+and new values. Watchpoints are extremely helpful, as they also
+work on data in arrays and function appropriately in the presence of
+aliasing. So, if you have an array in memory, you can put a watchpoint
+on a value in that array, and no matter which pointer the program uses
+to write that value, the debugger will still break on the watchpoint
+for that memory location.
+
+<p>
+
+You can get a list of all watchpoints and disable watchpoints with
+the same command as breakpoints:
+<blockquote><pre>
+(gdb) info breakpoints
+(gdb) disable 7
+</pre></blockquote>
+where 7 is the <tt>Num</tt> of the breakpoint (left-most column in the
+output of <tt>info breakpoints</tt>); the numbering might be different
+if you've restarted gdb during this walkthrough.
+
+<h4>Disassembly</h4>
+
+Sometimes (like for Project 2), you need to see the
+assembly representation of the machine code being executed.
+Usually, this situation occurs because either you don't have the
+source or debugging information for a program, but you still need
+to understand in detail the behavior of the program. To see the
+assembly representation of the machine code being run, use the
+<tt>disassemble</tt> command combined with a <tt>print</tt>
+of the program counter register:
+<blockquote><pre>
+(gdb) disassemble
+(gdb) print/x $pc
+(gdb) list
+(gdb) where
+</pre></blockquote>
+
+By default, <tt>disassemble</tt> will show you the function you are currently
+in. You can also provide it with the name of another function and it
+will show you a dump of that one. To understand which assembly
+instruction you're on, use output from the <tt>print</tt> command
+above (which has been modified to &quot;show hex value&quot; via
+the <tt>/x</tt> flag; try <tt>help print</tt> and <tt>help x</tt> if you
+want to learn more). The <tt>print</tt> command on the program
+counter is used instead of the <tt>where</tt> command because gdb's <tt>where</tt>
+command will only print the instruction code address if execution is
+stopped at the first single instruction associated with a line of C
+code. The register <tt>$eip</tt> will also show the current instruction
+address. Be careful with syntax - while assembly uses the &#37; character
+to refer to registers, gdb uses the $ character.
+
+<p>
+
+Your output from the above might look something like:
+<blockquote><pre>
+(gdb) disassemble
+Dump of assembler code for function compute:
+   0x08048429 &lt;+0&gt;:push   &#37;ebp
+   0x0804842a &lt;+1&gt;:mov    &#37;esp,&#37;ebp
+   0x0804842c &lt;+3&gt;:sub    $0x10,&#37;esp
+   0x0804842f &lt;+6&gt;:movl   $0x0,-0x4(&#37;ebp)
+   0x08048436 &lt;+13&gt;:jmp    0x8048458 &lt;compute+47&gt;
+   0x08048438 &lt;+15&gt;:subl   $0x1,0x8(&#37;ebp)
+   0x0804843c &lt;+19&gt;:mov    0x8(&#37;ebp),&#37;eax
+   0x0804843f &lt;+22&gt;:and    $0x1,&#37;eax
+   0x08048442 &lt;+25&gt;:test   &#37;eax,&#37;eax
+   0x08048444 &lt;+27&gt;:jne    0x8048452 &lt;compute+41&gt;
+   0x08048446 &lt;+29&gt;:mov    -0x4(&#37;ebp),&#37;eax
+   0x08048449 &lt;+32&gt;:imul   0x8(&#37;ebp),&#37;eax
+   0x0804844d &lt;+36&gt;:mov    &#37;eax,-0x4(&#37;ebp)
+   0x08048450 &lt;+39&gt;:jmp    0x8048458 &lt;compute+47&gt;
+   0x08048452 &lt;+41&gt;:mov    0x8(&#37;ebp),&#37;eax
+   0x08048455 &lt;+44&gt;:add    &#37;eax,-0x4(&#37;ebp)
+=&gt; 0x08048458 &lt;+47&gt;:cmpl   $0x0,0x8(&#37;ebp)
+   0x0804845c &lt;+51&gt;:jg     0x8048438 &lt;compute+15&gt;
+   0x0804845e &lt;+53&gt;:mov    -0x4(&#37;ebp),&#37;eax
+   0x08048461 &lt;+56&gt;:leave
+   0x08048462 &lt;+57&gt;:ret
+End of assembler dump.
+(gdb) print/x $pc
+$3 = 0x8048458
+(gdb) list
+21
+22
+23int compute(int i) {
+24  int result = 0;
+25
+26  while (i &gt; 0)
+27  {
+28    i--;
+29
+30    if (i &#37; 2 == 0)
+(gdb) where
+#0  compute (i=9) at main.c:26
+#1  0x08048409 in main (argc=1, argv=0xffffdbc4) at main.c:15
+</pre></blockquote>
+
+From the <tt>print</tt> command, you can see that the program counter (PC)
+is at <tt>0x08048458</tt>, which in our example <tt>disassembly</tt> output
+corresponds to &quot;<tt>0x08048458 &lt;+47&gt;:cmpl   $0x0,0x8(&#37;ebp)</tt>&quot;
+Judging from the output from <tt>list</tt> and <tt>where</tt>,
+we ended after the last watchpoint.
+The <tt>result</tt> variable has just been changed,
+and we're about to perform the comparison for the while loop's conditional,
+to decide whether to go through the loop body again or
+fall through to the return statement.
+
+<p>
+
+To follow the individual assembly instructions, there are &quot;<tt>i</tt>&quot;
+versions of <tt>step</tt> and <tt>next</tt>:
+<blockquote><pre>
+(gdb) stepi
+(gdb) nexti
+</pre></blockquote>
+Besides using gdb to incrementally execute individual assembly instructions,
+you can also inspect the values of all the registers we've learned about so far,
+with <tt>info registers</tt>.
+<blockquote><pre>
+(gdb) info registers
+eax            0x99
+ecx            0xffffdbc4-9276
+edx            0xffffdb54-9388
+ebx            0xf7fb1ff4-134537228
+esp            0xffffdae80xffffdae8
+ebp            0xffffdaf80xffffdaf8
+esi            0x00
+edi            0x00
+eip            0x80484380x8048438 &lt;compute+15&gt;
+eflags         0x206[ PF IF ]
+cs             0x2335
+ss             0x2b43
+ds             0x2b43
+es             0x2b43
+fs             0x00
+gs             0x6399
+</pre></blockquote>
+
+<p>
+
+Finally, to quit gdb, <tt>kill</tt> (terminate) the application and then quit.
+<blockquote><pre>
+(gdb) kill
+(gdb) quit
+</pre></blockquote>
+
+There is nothing to <tt>svn commit</tt> for the walkthrough.
+
+<h2>Exercise 1</h2>
+
+The files needed for this exercise are in the <tt>ex1</tt> subdirectory of <tt>lab2</tt>.
+There are two <tt>.c</tt> files, <tt>test.c</tt> and <tt>library.c</tt>.
+Do not edit <tt>test.c</tt>: it is the driver program performing tests of the code
+in <tt>library.c</tt>.  Run <tt>make</tt> to create the <tt>test</tt> program.
+
+<p>
+
+There are two tests that will run when you execute the binary <tt>test</tt>,
+and both of them will initially fail. You should set appropriate
+breakpoints in the <tt>library.c</tt> source to stop execution in the functions
+being tested (<tt>multiStrlen</tt> and <tt>twoFingerSort</tt>),
+inspect the arguments, and fix the functions to match the
+behavior expected by the test. Remember to re-run <tt>make</tt> after you make
+any changes to the source code!
+
+<p>
+
+Commit any changes you make to the source file <tt>library.c</tt>.
+Create (and <tt>svn add</tt> and <tt>svn commit</tt>) a <tt>lab2/readme.txt</tt>,
+and in it describe the  gdb commands you used for this exercise.
+Please try to use the debugger to
+find bugs instead of just staring at the code - it has been
+maliciously crafted to be trivial to find through the debugger and
+annoying to find via just staring at the code.
+
+<p>
+
+And don't try to just return the right answer (i.e. 42 or NULL) to
+kludge the tests to pass - fix the code!
+
+<h2>Exercise 2</h2>
+
+Make and run the program in the <tt>lab2/ex2</tt> directory. Note that it's not
+printing out anything, even though <tt>stringToPrint</tt> has a value! Run it
+under the debugger. When and how is the array that gets printed
+getting corrupted? Specifically, on which line does it occur, and what
+are the values of the local variables at one point where a corrupted
+value is written? What debugger commands did you use? Commit answers
+to these questions into your <tt>readme.txt</tt> file. You do not need to fix
+this program.
+
+<h2>Exercise 3</h2>
+
+You may want to finish this exercise after lab section
+since it may take longer.  Doing this exercise is a good
+test of the skills you will need to do Project 2 (p2bomb).
+
+<p>
+
+There is a 32-bit x86 linux binary <tt>bin-linux</tt> in
+the <tt>ex3</tt> directory.  There are no sources or debugging
+information available.  Use gdb to load it, use the start command, and
+use the debugging commands from the walkthrough to answer the
+following questions.
+
+<ol>
+<li> How much space is being reserved for locals on the stack frame?
+Ignore the first three lines of the assembly - those instructions are
+administrative setup related to stack frame alignment.
+<li> After the stack is set up but before a call is made to the function,
+a pointer value is stored into a local. What is the string at the address
+location being pointed to?
+<li> Set a breakpoint on the assembly instruction after returning from the
+function call. What debugger command did you use to do that?
+<li> What value was returned from the function call?  Remember
+what particular register holds the function return value, and how we can inspect
+the values of registers.
+</ol>
+
+Make sure you know how to answer these questions!  Having the skills to answer
+these questions is more important than simply knowing the answers. You
+can find the answers in <tt>.answers.txt</tt> (note the leading &quot;<tt>.</tt>&quot;).
+
+</blockquote>
+
+<small>(Based on the lab2 originally written for cs154 by <a href="http://www.lars.com">Lars Bergstrom</a>)</small>
+
+</body>
+</html>
