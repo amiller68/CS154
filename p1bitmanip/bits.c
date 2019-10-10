@@ -125,7 +125,7 @@ NOTES:
  */
 int absVal(int x) {
   int sign = x >> 31;
-  return (x ^ sign) - sign;
+  return (x ^ sign) + (~sign + 1);
 }
 
 /************************************************ 
@@ -154,7 +154,7 @@ int addOK(int x, int y) {
  *   Rating: 2
  */
 int allEvenBits(int x) {
-	int even, odd;
+	int even;
 	even = 0x55;
 	even += even << 8;
 	even += even << 16;
@@ -283,7 +283,13 @@ int ezThreeFourths(int x) {
  *   Rating: 2
  */
 int fitsBits(int x, int n) {
-  return 2;
+  int mask, shift, neg, pos;
+  mask = x >> 31;
+  shift = x >> (n + ~0);
+  neg = !!mask & !~shift;
+  pos = !mask & !shift;
+  return pos | neg;
+
 }
 
 /************************************************
@@ -312,7 +318,15 @@ int getByte(int x, int n) {
  *   Rating: 4 
  */
 int greatestBitPos(int x) {
-  return 2;
+  int tmin, mask;
+  tmin = 1 << 31;
+  mask = tmin & (x >> 31);
+  x |= x >> 1;
+  x |= x >> 2;
+  x |= x >> 4;
+  x |= x >> 8;
+  x |= x >> 16;
+  return (x ^ (x >> 1)) | mask;
 }
 
 /************************************************
@@ -366,32 +380,21 @@ int isEqual(int x, int y) {
 
 /************************************************
  * isLess - if x < y  then return 1, else return 0 
- *   Example: isLess(4,5) = 1.
+*   Example: isLess(4,5) = 1.
  *   Legal ops: ! ~ & ^ | + << >>
  *   Max ops: 24
  *   Rating: 3
  */
 int isLess(int x, int y) {
-  int sub, mask, min, mx, my, max;
-  printf("x : %d\n", x);
-  printf("y : %d\n", y);
+  int sub, msub, mx, my, over, xeqy;
   sub = y + (~x+1);
-//if sub != 0, return 01
-//if sub == 0, return 0
-  mx = x >> 31;
+  msub = sub >> 31;
+  mx = ~x >> 31;
   my = y >> 31;
-  printf("Sub : %d\n", sub);
-  mask = sub >> 31;
-  printf("mask : %d\n", mask);
-  min = 1 << 31;
-  max = min ^ y;
-  min = x ^ min;
-  printf("!Mask : %d\n", !mask);
-  printf("!!Sub : %d\n", !!sub);
-  printf("!Min : %d\n", !min);
-  printf("(!(~mx & my)) : %d\n", (!(~mx & my)));
-  return ((!mask & !!sub) | (!!sub & !min) | (!mask & !(~mx & my))) & !!max ;
-		// normal cases and tmin edges        +,-
+  over = (!!(msub ^ mx)) & (!(mx^my));
+  msub = !msub;
+  xeqy = !sub;
+  return (msub ^ over) & !xeqy;
 }
 
 /************************************************
@@ -417,8 +420,11 @@ int isNonNegative(int x) {
 int isPower2(int x) {
 //only one bit is 1
 //not the last bit
-  printf("Test = %d\n", INT_MIN + ~0);
-  return 2;
+  int mask;
+  x &= ~(x >> 31);
+  mask = x;
+  x &= x + ~0;
+  return !x & !!mask;
 }
 
 /************************************************
@@ -429,10 +435,7 @@ int isPower2(int x) {
  *   Rating: 1
  */
 int isTmin(int x) {
-  int a, max;
-  max = ~(1<<31);
-  a = x ^ max;
-  return !~a;
+  return (!~(x ^ (x+~0))) & !!x;
 }
 
 /************************************************
