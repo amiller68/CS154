@@ -1,3 +1,8 @@
+/*
+Name: Alex Miller
+CNetID: 12177451
+*/
+
 /* 
  * CS:APP Data Lab 
  * 
@@ -112,8 +117,6 @@ NOTES:
 
 
 #endif
-
-#include <limits.h>
 
 /************************************************ 
  * absVal - absolute value of x
