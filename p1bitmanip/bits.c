@@ -221,8 +221,7 @@ int bitNor(int x, int y) {
  *  Rating: 2
  */
 int byteSwap(int x, int n, int m) {
-    int nth, mth;
-	int a, b;
+    int a, b, nth, mth;
 	nth = 255 << (n << 3);
 	mth = 255 << (m << 3);
 	a = x & nth;
@@ -418,8 +417,6 @@ int isNonNegative(int x) {
  *   Rating: 4
  */
 int isPower2(int x) {
-//only one bit is 1
-//not the last bit
   int mask;
   x &= ~(x >> 31);
   mask = x;
@@ -457,7 +454,17 @@ int minusOne(void) {
  *   Rating: 3 
  */
 int rotateLeft(int x, int n) {
-  return 2;
+  int mask, sign;
+  sign = x >> 31;
+  sign = sign << n;
+  mask = 0;
+  mask = x | mask;
+  mask = mask >> (31 + (~n + 1));
+  mask = mask >> 1;
+  mask = mask ^ sign;
+  x = x << n;
+  x = x | mask;
+  return x;
 }
 
 /************************************************
@@ -470,6 +477,11 @@ int rotateLeft(int x, int n) {
  *   Rating: 3
  */
 int satMul2(int x) {
-  return 2;
+  int sat, mask, over;
+  sat = x << 1;
+  mask = (sat >> 31) ^ (x >> 31);
+  over = (mask << 31) ^ (sat >> 31);
+  return (sat | mask) & (~mask | over);
+
 }
 
