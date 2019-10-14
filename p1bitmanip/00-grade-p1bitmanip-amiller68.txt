@@ -1,0 +1,57 @@
+amiller68 p1bitmanip grade: 103/103 
+ 
+https://phoenixforge.cs.uchicago.edu/svn/amiller68-cs154-spr-19/p1bitmanip 
+Grading revision: 21 
+
+$ make
+gcc -O -Wall -lm -o btest bits.c btest.c decl.c tests.c
+gcc -O -Wall -o ishow ishow.c
+
+$ ./driver.pl
+1. Running './dlc -z' to identify coding rules violations.
+/usr/include/stdc-predef.h:1: Warning: Non-includable file <command-line> included from includable file /usr/include/stdc-predef.h.
+
+Compilation Successful (1 warning)
+
+2. Compiling and running './btest -g' to determine correctness score.
+gcc -O -Wall -lm -o btest bits.c btest.c decl.c tests.c 
+
+3. Running './dlc -Z' to identify operator count violations.
+/usr/include/stdc-predef.h:1: Warning: Non-includable file <command-line> included from includable file /usr/include/stdc-predef.h.
+
+Compilation Successful (1 warning)
+
+4. Compiling and running './btest -g -r 2' to determine performance score.
+gcc -O -Wall -lm -o btest bits.c btest.c decl.c tests.c 
+
+
+5. Running './dlc -e' to get operator count of each function.
+
+Correctness Results	Perf Results
+Points	Rating	Errors	Points	Ops	Puzzle
+4	4	0	2	5	absVal
+3	3	0	2	10	addOK
+2	2	0	2	7	allEvenBits
+4	4	0	2	6	bang
+4	4	0	2	39	bitCount
+1	1	0	2	3	bitNor
+2	2	0	2	21	byteSwap
+3	3	0	2	8	conditional
+3	3	0	2	6	ezThreeFourths
+2	2	0	2	13	fitsBits
+2	2	0	2	5	getByte
+4	4	0	2	16	greatestBitPos
+2	2	0	2	2	implication
+3	3	0	2	11	isAsciiDigit
+2	2	0	2	4	isEqual
+3	3	0	2	18	isLess
+3	3	0	2	4	isNonNegative
+4	4	0	2	10	isPower2
+1	1	0	2	8	isTmin
+1	1	0	2	1	minusOne
+3	3	0	2	11	rotateLeft
+3	3	0	2	11	satMul2
+
+Score = 103/103 [59/59 Corr + 44/44 Perf] (219 total operators)
+
+Final Grade: 103/103
