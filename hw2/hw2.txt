@@ -1,0 +1,24 @@
+1)
+
+Part Operand 				Value 		Mode
+A. 	 (%rcx)					0x09		Indirect
+B. 	 0x14(%rax)				unknow		Depends on Endianess
+C. 	 560					0x54		Absolute
+D.   (%rax,%rsi)			0xBC		Indexed
+E.   0x108(%rdi,%rdx,0x20)	0x42		Scaled Indexed
+F.   $251					0XFB		Immediate
+G.   (,%rsi,0x45)x210 		0x42		Scaled Indexed
+
+2)
+
+Part Instruction 				Destination 	Value
+A. 	 incq %rsi					$rsi			0x09
+B.   xorq %rbx,%rbx				Unknow			%rbx is not a register
+C.   decq (%rax)				0x210			0xAA
+D.   subq 0x220,%rdi			%rdi			0xFFFFFFFFFFFFFEE0
+E.   notq %rdx					%rdx			0XFFFFFFFFFFFFFFFE
+F.   shlq %rsi,(%rcx)			0x220			0x900
+G.   subq $0x100,%rcx			%rcx			0x120
+H.   imulq %rdi,(%rax,%rsi)		0x218			0xBC
+I.   orq (%rcx),%rax			%rax			0x219
+J.   shrq %rdx,(%rdi,%rsi,37)	0x228			0x21
