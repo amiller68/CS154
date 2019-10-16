@@ -1,0 +1,20 @@
+amiller68 hw1 grade: 21/22
+
+Graded files from svn revision 13
+
+--------------------------------------
+Question 1 points and comments: 10/10
+Good job! Consider using parentheses for better readability.
+Graded by: Hanson Lu (hansonlu)
+--------------------------------------
+
+Question 2 points and comments: 11/12
+
+For part E, your expression is generally correct, but should be comparing the most and least
+significant bytes instead of individual bits.
+
+Graded by: Rose Pierce (rosepierce)
+--------------------------------------
+
+If you believe there is an error in how you were graded, you have a week,
+starting from when this grade was returned, to notify us via email.
