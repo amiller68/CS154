@@ -1,0 +1,25 @@
+amiller68 hw2 grade: 30/34
+
+Graded files from svn revision 25
+
+--------------------------------------
+Question 1 points and comments: 14/14
+
+Good job!
+
+Graded by: Hanson Lu (hansonlu)
+--------------------------------------
+
+Question 2 points and comments: 16/20
+
+-2 B: The value is 0x0 as it does not matter that the register value is not know. Also, %rbx is a register.
+
+-1 D: Value is 0xF7. That is absolute addresssing mode not an immediate.
+
+-1 H: Value is 0xBC00 which is not == to 0xBC
+
+Graded by: Henry Filosa (hfilosa)
+--------------------------------------
+
+If you believe there is an error in how you were graded, you have a week,
+starting from when this grade was returned, to notify us via email.
