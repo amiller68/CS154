@@ -1,0 +1,32 @@
+Alex Miller
+amiller68
+
+1)
+	a. ttttttttssbb
+
+	b.
+		
+	Operation Address Hit/Miss? Value
+	Read 	  0x833   Hit		0xD0
+	Read 	  0x00A	  Hit		0x4A
+	Read 	  0x006	  Hit		0x46
+	Read 	  0xFFE	  Hit		0x03
+	Read 	  0x54D	  Miss		Unknown
+	Write 	  0x54E   Hit		n/a
+	Write 	  0x007   Hit		n/a
+	Read 	  0x44C	  Miss		unknown
+	Read 	  0xFFE   Miss		unknown
+
+2)
+Assumption: 12 bit addresses (last value stores at 0x3FF).
+
+	a. 100% | x[0][0] starts at 0x000, x[1][0] at 0x200. The addresses have differing tag bits but equal set bits . The first read is a miss (compulsory); the value is read into cache. The second read then conflicts with the first, causing a miss. This pattern persists as the cache writes different parts of the memory to different sets.
+	b. 25%  | Assuming that block size stays 16 bytes, we are now working with 6 s bits, 4 b bits and 2 tag bits. First read is a compulsory miss, value is then read into cache. The second read however, does not conflict as before (differing set bits), it's still a compulsory miss; its value is written into the cache. Moreover, each block contains 4 ints (size of 4 bytes, 16 byte blocks) so the next siz reads should hit the written blocks. Therefore the pattern is 2 misses followed by 6 hits. 
+	c. 25%  | The two way associativity resolves the conflict pattern seen in part A (equivalent tags resolved by differing tags). The code then exhibits similar behavior to that of part B.
+	d. No   | Increasing the cache size just lets us hold more values simultaneously; since the code does not access the same integere in memory twice, this should not affect hit rate.
+	e. Yes  | Increasing the block size allows us to hold more ints in a block; this allows us to access the same blocks repeatedly
+
+3)
+
+	a. Lal * (1 - (Fld + Fbj + Fst)) + Lbj * Fbj + Fld * R * H + Fst * (1 - R) * M +  Fst * R * H + Fld * (1 - R) * M
+	b. 17.63
