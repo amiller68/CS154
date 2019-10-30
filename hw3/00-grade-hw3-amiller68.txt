@@ -1,0 +1,28 @@
+amiller68 hw3 grade: 32/32
+
+Graded files from svn revision 29
+
+--------------------------------------
+Question 1 points and comments: 10/10
+
+This works, but you can use simpler C syntax {} for conditional logic
+
+Graded by: Henry Filosa (hfilosa)
+--------------------------------------
+
+Question 2 points and comments: 12/12
+
+Great job!
+
+Graded by: Rose Pierce (rosepierce)
+--------------------------------------
+
+Question 3 points and comments: 10/10
+
+Good job!
+
+Graded by: Hanson Lu (hansonlu)
+--------------------------------------
+
+If you believe there is an error in how you were graded, you have a week,
+starting from when this grade was returned, to notify us via email.
