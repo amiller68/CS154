@@ -1,0 +1,29 @@
+amiller68 hw4 grade: 52/55
+
+Graded files from svn revision 35
+
+--------------------------------------
+Question 1 points and comments: 19/20
+
+-1 in the last row of the table, we actually know the value at 0xFFE, which is 03,
+as shown in the 4th row. That value is reloaded into the cache, after eviction.
+
+Graded by: Hanson Lu (hansonlu)
+--------------------------------------
+
+Question 2 points and comments: 18/20
+
+-2 E: It is actually because of a decrease in cold misses
+
+Graded by: Henry Filosa (hfilosa)
+--------------------------------------
+
+Question 3 points and comments: 15/15
+
+Great job!
+
+Graded by: Rose Pierce (rosepierce)
+--------------------------------------
+
+If you believe there is an error in how you were graded, you have a week,
+starting from when this grade was returned, to notify us via email.
