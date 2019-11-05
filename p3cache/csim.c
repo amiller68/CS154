@@ -109,6 +109,9 @@ int main(int argc, char **argv)
 
 void update_lru(LRU *L, int ind){
 	lru_ind *token = L->head;
+	//Head of list is MRU
+	//Tail of list is LRU
+	if (token->ind == ind) return;
 	lru_ind *next = NULL;
 	while(token->next != NULL){
 		next = token->next;
@@ -119,6 +122,8 @@ void update_lru(LRU *L, int ind){
 		}
 		token = next;
 	}
+
+	return;
 }
 
 void exec(Cache *C, instr *i, int *hc, int *mc, int *ec, int v){
@@ -132,7 +137,9 @@ void exec(Cache *C, instr *i, int *hc, int *mc, int *ec, int v){
 			proc = 1;
 		default:
 			return;
-	} 
+	}
+
+	printf("%d\n", proc); 
 	int b = C->b;
 	int s = C->s;
 
@@ -148,18 +155,20 @@ void exec(Cache *C, instr *i, int *hc, int *mc, int *ec, int v){
 	int j = 0;
 	int found = 0; 
 
-L_instr:
+M_instr:
 
 	for( ; j < C->E; j++){
 		//Compulsory Miss
 		if(!(Set[j].val)){
 			(*mc)++;
 			if(v) printf(" miss " );
+			Set[j].val = 1;
 			break;
 		}
 		//hit
-		else if(Set[j].tag == t_bits){
+		if(Set[j].tag == t_bits){
 			(*hc)++;
+			Set[j].val = 1;
 			if(v) printf(" hit ");
 			found = 1;
 			break;
@@ -174,7 +183,7 @@ L_instr:
 		if(proc){
 			if(v) printf(" eviction ");
 			(*ec)++;
-			goto L_instr;
+			goto M_instr;
 		}
 	}
 	
@@ -203,7 +212,7 @@ Cache *createCache(int s, int e, int b){
 		bl[i].val = 0;
 		bl[i].tag = 0;
 		bl[i].b = b;
-		ind = i % E;
+		ind = (E-i) % E;
 		l[i].ind = ind;
 		if(ind == (E -1)) l[i].next = NULL;
 		else l[i].next = &l[i] + 1;		
