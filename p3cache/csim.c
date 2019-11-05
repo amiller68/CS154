@@ -36,10 +36,10 @@ typedef struct Set{
 } Set;
 
 typedef struct Cache{
-	int S;
+	int s;
 	int E;
-	int B;
-	Set *Se;
+	int b;
+	Set *S;
 } Cache;
 
 void printCache(Cache *C);
@@ -90,7 +90,7 @@ int main(int argc, char **argv)
 	if (trace== NULL){ printf("No Trace\n"); exit(1);}
   	
   	while ((read = getline(&line, &len, trace)) != EOF){
-		if(verb) printf("%s", strtok(line, "\n");
+		if(verb) printf("%s", strtok(line, "\n"));
 		lineToinstr(line, in);
 		exec(C, in, &hc, &mc, &ec, verb);
     }
@@ -122,42 +122,44 @@ void update_lru(LRU *L, int ind){
 }
 
 void exec(Cache *C, instr *i, int *hc, int *mc, int *ec, int v){
-	switch(instr->inst){
+	int proc = -1;
+	switch(i->inst){
 		case 'S':
-			int proc = 0;
+			proc = 0;
 		case 'L':
-			int proc = 0;
+			proc = 0;
 		case 'M':
-			int proc = 1;
+			proc = 1;
 		default:
 			return;
 	} 
+	int b = C->b;
+	int s = C->s;
 
-	int b_mask = (1 << b) - 1;
-	int b_bits = i->addr & b_mask;
 	i->addr >>= b;
 	int s_mask = (1 << s) - 1;
-	s_bits = i->addr & s_mask;
+	int s_bits = i->addr & s_mask;
 	i->addr >>= s;
 	int t_bits = i->addr;
 	
-	block *Set = (C->Se)->B;
-	LRU *L = (C-Se)->L;
-	int i = 0;
+	Set *S = &(C->S)[s_bits];
+	Block *Set = S->B;
+	LRU *L = S->L;
+	int j = 0;
 	int found = 0; 
 
 L_instr:
 
-	for( ; i < C->E; i++){
+	for( ; j < C->E; j++){
 		//Compulsory Miss
-		if(!(Set[i].val)){
-			*mc++;
+		if(!(Set[j].val)){
+			(*mc)++;
 			if(v) printf(" miss " );
 			break;
 		}
 		//hit
-		else if(Set[i].tag = t_bits){
-			*hc++;
+		else if(Set[j].tag == t_bits){
+			(*hc)++;
 			if(v) printf(" hit ");
 			found = 1;
 			break;
@@ -167,16 +169,16 @@ L_instr:
 
 	//Capacity and Conflict
 	if(!found){
-		i = L->tail;
-		Set[i].tag = t_bits;
+		j = (L->tail)->ind;
+		Set[j].tag = t_bits;
 		if(proc){
 			if(v) printf(" eviction ");
-			*ec++;
+			(*ec)++;
 			goto L_instr;
 		}
 	}
 	
-	update_lru(L , i);
+	update_lru(L , j);
 
 	if(v) printf("\n");
 
@@ -187,7 +189,6 @@ L_instr:
 Cache *createCache(int s, int e, int b){
 	int S = pow(2, s);
 	int E = e;
-	int B = pow(2, b);
 	
 	Cache *C = malloc(sizeof(Cache));
 	Block *bl = malloc(S*E*sizeof(Block));
@@ -220,22 +221,23 @@ Cache *createCache(int s, int e, int b){
 		L++; 
 	}
 
-	C->S = S;
+	C->s = s;
 	C->E = E;
-	C->B = B;
-	C->Se = Se;
+	C->b = b;
+	C->S = Se;
 	
 	return C;
 }
 
 void printCache(Cache *C){
-	printf("S: %d | E: %d | B: %d\n", C->S, C->E, C->B);
+	printf("s: %d | E: %d | b: %d\n", C->s, C->E, C->b);
 	int i = -1;
 	int j = -1;
 	Set *Se = NULL;
 	Block *bl = NULL;
-	for(i=0; i < C->S; i++){
-		Se = C->Se;
+	int S = pow(2, C->s);
+	for(i=0; i < S; i++){
+		Se = C->S;
 		printf("SET %d:\n", i);
 		lru_ind *l = (Se->L)->head;
 		while(l != NULL){
