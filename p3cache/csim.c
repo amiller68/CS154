@@ -60,7 +60,7 @@ int main(int argc, char **argv)
 	ssize_t read = 0;	
 	instr *in = malloc(sizeof(instr));
 	Cache *C = NULL;
-	while((res = getopt(argc, argv, "vs:e:b:t:")) != -1){
+	while((res = getopt(argc, argv, "vs:E:b:t:")) != -1){
 		switch(res){
 			case 'v':
 				verb = 1;
@@ -68,7 +68,7 @@ int main(int argc, char **argv)
 			case 's':
 				s = atoi(optarg);
 				break;
-			case 'e':
+			case 'E':
 				e = atoi(optarg);
 				break;
 			case 'b':
@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 
 
 
-    printSummary(mc, hc, ec);
+    printSummary(hc, mc, ec);
     return 0;
 }
 
@@ -127,17 +127,21 @@ void update_lru(LRU *L, int ind){
 }
 
 void exec(Cache *C, instr *i, int *hc, int *mc, int *ec, int v){
-	int proc = i->inst;
-	switch(proc){
+	int proc = -1;
+	switch(i->inst){
 		case 'S':
 			proc = 0;
+			break;
 		case 'L':
 			proc = 0;
+			break;
 		case 'M':
 			proc = 1;
+			break;
 		default:
 			return;
 	}
+
 
 	int b = C->b;
 	int s = C->s;
@@ -160,8 +164,10 @@ M_instr:
 		//Compulsory Miss
 		if(!(Set[j].val)){
 			(*mc)++;
-			if(v) printf(" miss " );
+			if(v) printf("miss " );
 			Set[j].val = 1;
+			Set[j].tag = t_bits;
+			found = 1;
 			break;
 		}
 		//hit
@@ -174,16 +180,14 @@ M_instr:
 		}
 	}
 	
-
 	//Capacity and Conflict
 	if(!found){
 		j = (L->tail)->ind;
 		Set[j].tag = t_bits;
-		if(proc){
-			if(v) printf(" eviction ");
-			(*ec)++;
-			goto M_instr;
-		}
+		if(v) printf(" miss eviction ");
+		(*ec)++;
+		(*mc)++;
+		if(proc) goto M_instr;
 	}
 	
 	update_lru(L , j);
