@@ -1,18 +1,24 @@
-A)
+1)
+a.
 Line 4 in the assembley corresponds to the assignment of the += espression on line 4 of the C code.
 It just loads the value stored in *pb to be used to add to arr[i].
 
-B)
-*pb refers points to a long in the array arr
+b.
+Scenario: *pb points to a long in the array arr. The value at (%rsi) needs to be refreshed in every loop in
+this scenario because it can change as the loop exexcutes.
 
-C)
+c.
 Memory Aliasing
 
-D)
-In order to achieve the same effect as the re-ordering, you would need to declare some local long var and assign the value stored at pb to it before the for loop:
+d.
+In order to achieve the same effect as the re-ordering, you would need to declare some local (to the function)
+long var and assign the value stored at pb to it BEFORE the for loop. Then you would use that var in the for
+loop instead of *pb:
 
 ...
 long i;
 long some_var = *pb;
 for(int i; i < n; i ++){
-...
+	arr[i] += some_var;
+....
+.
