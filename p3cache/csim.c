@@ -7,6 +7,7 @@
 #include <getopt.h>
 #include <string.h>
 
+
 typedef struct instr{
 	char inst;
 	int addr;
@@ -44,7 +45,7 @@ typedef struct Cache{
 void printCache(Cache *C);
 Cache *createCache(int s, int e, int b);
 void lineToinstr(char *line, instr *i);
-void exec(Cache *C, instr *i);
+void exec(Cache *C, instr *i, int *hc, int *mc, int *ec, int v);
 
 int main(int argc, char **argv)
 {
@@ -89,8 +90,9 @@ int main(int argc, char **argv)
 	if (trace== NULL){ printf("No Trace\n"); exit(1);}
   	
   	while ((read = getline(&line, &len, trace)) != EOF){
-		if(verb) printf("%s", line);
+		if(verb) printf("%s", strtok(line, "\n");
 		lineToinstr(line, in);
+		exec(C, in, &hc, &mc, &ec, verb);
     }
 	
 	
@@ -102,6 +104,84 @@ int main(int argc, char **argv)
 
     printSummary(mc, hc, ec);
     return 0;
+}
+
+
+void update_lru(LRU *L, int ind){
+	lru_ind *token = L->head;
+	lru_ind *next = NULL;
+	while(token->next != NULL){
+		next = token->next;
+		if(next->ind == ind){
+			token->next = next->next;
+			next->next = L->head;
+			L->head = next;
+		}
+		token = next;
+	}
+}
+
+void exec(Cache *C, instr *i, int *hc, int *mc, int *ec, int v){
+	switch(instr->inst){
+		case 'S':
+			int proc = 0;
+		case 'L':
+			int proc = 0;
+		case 'M':
+			int proc = 1;
+		default:
+			return;
+	} 
+
+	int b_mask = (1 << b) - 1;
+	int b_bits = i->addr & b_mask;
+	i->addr >>= b;
+	int s_mask = (1 << s) - 1;
+	s_bits = i->addr & s_mask;
+	i->addr >>= s;
+	int t_bits = i->addr;
+	
+	block *Set = (C->Se)->B;
+	LRU *L = (C-Se)->L;
+	int i = 0;
+	int found = 0; 
+
+L_instr:
+
+	for( ; i < C->E; i++){
+		//Compulsory Miss
+		if(!(Set[i].val)){
+			*mc++;
+			if(v) printf(" miss " );
+			break;
+		}
+		//hit
+		else if(Set[i].tag = t_bits){
+			*hc++;
+			if(v) printf(" hit ");
+			found = 1;
+			break;
+		}
+	}
+	
+
+	//Capacity and Conflict
+	if(!found){
+		i = L->tail;
+		Set[i].tag = t_bits;
+		if(proc){
+			if(v) printf(" eviction ");
+			*ec++;
+			goto L_instr;
+		}
+	}
+	
+	update_lru(L , i);
+
+	if(v) printf("\n");
+
+	return;
+
 }
 
 Cache *createCache(int s, int e, int b){
