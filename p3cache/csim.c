@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 	}
 	
 	C = createCache(s, e, b);
-	printCache(C);
+	//printCache(C);
 	
 	trace = fopen(t,"r");
 	if (trace== NULL){ printf("No Trace\n"); exit(1);}
@@ -127,8 +127,8 @@ void update_lru(LRU *L, int ind){
 }
 
 void exec(Cache *C, instr *i, int *hc, int *mc, int *ec, int v){
-	int proc = -1;
-	switch(i->inst){
+	int proc = i->inst;
+	switch(proc){
 		case 'S':
 			proc = 0;
 		case 'L':
@@ -139,7 +139,6 @@ void exec(Cache *C, instr *i, int *hc, int *mc, int *ec, int v){
 			return;
 	}
 
-	printf("%d\n", proc); 
 	int b = C->b;
 	int s = C->s;
 
