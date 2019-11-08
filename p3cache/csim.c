@@ -16,18 +16,20 @@ typedef struct instr{
 typedef struct Block{
 	int val;
 	int tag;
-	int b;
 } Block;
 
-typedef struct lru_ind{
-	int ind;
-	struct lru_ind *next;
-} lru_ind;
+typedef struct LRU_header LRU;
+typedef struct lru_ind_header lru_ind;
 
-typedef struct LRU{
+struct lru_ind_header{
+	int ind;
+	struct lru_ind_header *next;
+};
+
+struct LRU_header{
 	lru_ind *head;
 	lru_ind *tail;
-} LRU;
+};
 
 typedef struct Set{
 	int E;
@@ -40,12 +42,18 @@ typedef struct Cache{
 	int E;
 	int b;
 	Set *S;
+
+	//for free
+	Block *bl;
+	lru_ind *l;
+	LRU *L;
 } Cache;
 
 void printCache(Cache *C);
 Cache *createCache(int s, int e, int b);
 void lineToinstr(char *line, instr *i);
 void exec(Cache *C, instr *i, int *hc, int *mc, int *ec, int v);
+void free_cache(Cache *C);
 
 int main(int argc, char **argv)
 {
@@ -59,6 +67,7 @@ int main(int argc, char **argv)
 	size_t len = 0;
 	ssize_t read = 0;	
 	instr *in = malloc(sizeof(instr));
+	if(in == NULL){ exit(1); }
 	Cache *C = NULL;
 	while((res = getopt(argc, argv, "vs:E:b:t:")) != -1){
 		switch(res){
@@ -81,48 +90,62 @@ int main(int argc, char **argv)
 				printf("Input Error\n");
 				exit(1);
 		}
-	}
-	
+	}	
 	C = createCache(s, e, b);
-	//printCache(C);
-	
 	trace = fopen(t,"r");
 	if (trace== NULL){ printf("No Trace\n"); exit(1);}
-  	
   	while ((read = getline(&line, &len, trace)) != EOF){
-		if(verb) printf("%s", strtok(line, "\n"));
+		line = strtok(line, "\n");
+		
+		if(verb) printf("%s", line);
+		
 		lineToinstr(line, in);
+
+
 		exec(C, in, &hc, &mc, &ec, verb);
     }
 	
 	
+    printSummary(hc, mc, ec);
 	free(in);
 	free(line);
+	free_cache(C);
 	fclose(trace);
 
-
-
-    printSummary(hc, mc, ec);
     return 0;
 }
 
+void print_L(LRU *L){
+	lru_ind *l = L->head;
+	printf("%d -> ", l->ind);
+	while (l->next != NULL){
+	
+		l = l->next;
+		printf("%d -> ", l->ind);
+	}
+	printf("\n");
+	return;
+}
 
-void update_lru(LRU *L, int ind){
+void update_lru(LRU *L, int i){
 	lru_ind *token = L->head;
 	//Head of list is MRU
 	//Tail of list is LRU
-	if (token->ind == ind) return;
+	if (token->ind == i){
+		return;
+	}
+
 	lru_ind *next = NULL;
 	while(token->next != NULL){
 		next = token->next;
-		if(next->ind == ind){
+		if((next->ind) == i){
 			token->next = next->next;
 			next->next = L->head;
 			L->head = next;
 		}
 		token = next;
 	}
-
+	L->tail = token;
 	return;
 }
 
@@ -152,19 +175,17 @@ void exec(Cache *C, instr *i, int *hc, int *mc, int *ec, int v){
 	i->addr >>= s;
 	int t_bits = i->addr;
 	
-	Set *S = &(C->S)[s_bits];
+	Set *S = (C->S) + s_bits;
 	Block *Set = S->B;
 	LRU *L = S->L;
 	int j = 0;
 	int found = 0; 
 
-M_instr:
-
 	for( ; j < C->E; j++){
 		//Compulsory Miss
 		if(!(Set[j].val)){
 			(*mc)++;
-			if(v) printf("miss " );
+			if(v) printf(" miss " );
 			Set[j].val = 1;
 			Set[j].tag = t_bits;
 			found = 1;
@@ -187,11 +208,16 @@ M_instr:
 		if(v) printf(" miss eviction ");
 		(*ec)++;
 		(*mc)++;
-		if(proc) goto M_instr;
+		found = 1;
 	}
-	
-	update_lru(L , j);
 
+	if(proc){
+		if(v) printf(" hit ");
+		(*hc)++;
+	}
+
+
+	update_lru(L , j);
 	if(v) printf("\n");
 
 	return;
@@ -207,64 +233,95 @@ Cache *createCache(int s, int e, int b){
 	lru_ind *l = malloc(S*E*sizeof(lru_ind));
 	Set *Se = malloc(S*sizeof(Set));
 	LRU *L = malloc(S*sizeof(LRU));
-	
+
+	if(C == NULL || Se == NULL || bl == NULL || l == NULL || L == NULL){
+		exit(1);
+	}	
+
+	//for Freeing purposes
+	C->bl = bl;
+	C->l = l;
+	C->L = L;
+	C->S = Se;
+	C->E = E;
+	C->s = s;
+	C->b = b;
+
 	int ind = -1;
 	int i = -1;
 	//fill init values of lru_indices + blocks
 	for(i = 0; i < S*E; i++){
-		bl[i].val = 0;
-		bl[i].tag = 0;
-		bl[i].b = b;
-		ind = (E-i) % E;
-		l[i].ind = ind;
-		if(ind == (E -1)) l[i].next = NULL;
-		else l[i].next = &l[i] + 1;		
+		bl->val = 0;
+		bl->tag = -1;
+		ind = i % E;
+		l->ind = ind;
+		if(ind == (E -1)) l->next = NULL;
+		else l->next = l + 1;
+		l++; bl++;		
 	} 	
 
+	l = C->l; bl = C->bl;
+
 	for(i=0; i<S; i++){
-		Se[i].E = E;
-		Se[i].B = bl;
+		Se->E = E;
+		Se->B = bl;
 		//inc b pointer by E indices
 		bl += E;
 		L->head = l;
 		L->tail = l + (E - 1);
-		Se[i].L = L;
+		Se->L = L;
 		l += E;		
-		L++; 
+		L++;
+		Se++; 
 	}
 
-	C->s = s;
-	C->E = E;
-	C->b = b;
-	C->S = Se;
+
 	
 	return C;
 }
 
+void free_cache(Cache *C){
+	Block *bl = C->bl;
+	lru_ind *l = C->l;
+	Set *Se = C->S;
+	LRU *L = C->L; 
+		free(bl);
+		free(l);
+		free(Se);
+		free(L);
+
+	free(C);	
+	return;
+}
+/*
 void printCache(Cache *C){
 	printf("s: %d | E: %d | b: %d\n", C->s, C->E, C->b);
 	int i = -1;
 	int j = -1;
-	Set *Se = NULL;
+	Set *Se = C->S;
 	Block *bl = NULL;
+	lru_ind *l = NULL;
 	int S = pow(2, C->s);
+	LRU *L = NULL;
 	for(i=0; i < S; i++){
-		Se = C->S;
 		printf("SET %d:\n", i);
-		lru_ind *l = (Se->L)->head;
+		L = Se->L;
+		l = L->head;
 		while(l != NULL){
 			printf("%d->", l->ind);			
 			l = l->next;
  		}
 		printf("\n");
 		
+		bl = Se->B;
 		for(j=0; j < Se->E; j ++){
-			bl = Se->B;
-			printf("b %d: %d %d %d\n", j, bl[j].val, bl[j].tag, bl[j].b);
+			printf("b %d: %d %d\n", j, bl->val, bl->tag);
+			bl++;
 		}
+		Se++;
 	}
 }
-
+*/
 void lineToinstr(char *line, instr *i){
 	char *ch = NULL;
 	ch = strsep(&line, " ");
