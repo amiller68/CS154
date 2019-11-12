@@ -1,0 +1,25 @@
+1)
+	A
+		i. System Calls must necessarily trigger (trap) exceptions, while library functions do not inherently do so
+		ii. System Calls access code that exists in Kernel space; it has access to system resources. Library functions exist in user space; they don't have access to system resources
+	B 
+		System Calls
+		-> read: Reads specified number of bytes from file into buffer
+		-> pause: cause the calling process to sleep until it is terminated or a signal catching function inside of it is triggered 
+		-> fork: Calling process creates a child through duplication; calling process returns child pid, child process returns 0
+		-> signal: send a signal to a handler
+
+		-> fork: Spawns a new process from a parent; parent return value is the pid of the child; the child's ret val is 0
+		Library Calls
+		-> sprintf: places output on a specified putput stream followed by a tdrminating \0 byte
+		-> log: computes and returns the log of its argument
+		-> raise: Sends a signal to the executing thread or process
+		-> exit: Terminates the process and return the exit status to the parent
+2)
+	A. Error Number: 0 | Address: 0xC001520 | Exception Class: Fault
+	B.
+		1. The process comes to instruction  “idivl %ebx” is at address 0x08031000
+		2. This triggers a divide by 0 exception (Error Number 0 in the exception table)
+		3. This executes the code stored at 0xC001520, the DivideByZero Exception handler
+		4. Because %ebx contains the value zero, the (fault) handler triggers an abort (Detected attempted divide by 0)
+		5. The handler terminates the Application program that triggered the Exception handler
