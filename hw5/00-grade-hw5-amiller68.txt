@@ -1,0 +1,17 @@
+amiller68 hw5 grade: 20/20
+
+Graded files from svn revision 49
+
+--------------------------------------
+Question 1 points and comments: 20/20
+
+For part A, the assembly code more precisely refers to the expression "*pb".
+However, your answer can be considered correct.
+
+Good job!
+
+Graded by: Hanson Lu (hansonlu)
+--------------------------------------
+
+If you believe there is an error in how you were graded, you have a week,
+starting from when this grade was returned, to notify us via email.
