@@ -19,25 +19,42 @@ int is_transpose(int M, int N, int A[N][M], int B[M][N]);
  *     searches for that string to identify the transpose function to
  *     be graded.
  */
+
 char transpose_submit_desc[] = "Transpose submission";
 void transpose_submit(int M, int N, int A[N][M], int B[M][N])
 {
-    int g, h, i, j, k, l;
 
-	for(g = 0; g < N; g+=32){
-	for(h = 0; h < M; h +=32){
-    for (j = h; j < 32+h; j+=8) {
-        for (i = g; i < 32+g; i+=8) {
+    int b, c, d, i, j, k, l, o;
+
+	b = 8 / (M / 32);
+	o = 8 / b; 
+
+    for (j = 0; j < M; j+=8) {
+        for (i = 0; i < N; i+=8) {
+            for(c = 0; c < o; c++){
+			for(d = 0; d < o; d++){
+			for (k = 0; k < b; k++){
+				for (l = 0; l < b; l++){
+					B[j+k+(d*4)][i+l+(c*4)] = A[i+l+(c*4)][j+k+(d*4)];		
+				}
+			}
+			}
+			}
+        }
+	}
+/*
+    int i, j, k, l;
+
+    for (j = 0; j < M; j+=8) {
+        for (i = 0; i < N; i+=8) {
             for (k = 0; k < 8; k++){
 				for (l = 0; l < 8; l++){
 					B[j+k][i+l] = A[i+l][j+k];		
 				}
 			}
         }
-    }
 	}
-	}
-
+*/
 }
 
 /*
@@ -49,7 +66,7 @@ void transpose_submit(int M, int N, int A[N][M], int B[M][N])
  * trans - A simple baseline transpose function, not optimized for the cache.
  */
 
-char trans_desc[] = "Square by square trasnpose";
+char trans_desc[] = "Square by square trasnpose //no miss evict";
 void trans(int M, int N, int A[N][M], int B[M][N])
 {
 
@@ -60,25 +77,47 @@ void trans(int M, int N, int A[N][M], int B[M][N])
 // therefore 8 ints per block
 // operate on matrices by 8*8 blocks
 // a blocks inc column wise
-// b blcoks row wise 
+// b blcoks row wise
+ 
 
-    int g, h, i, j, k, l;
+    int b, i, j, k, l;
 
-	for(g = 0; g < N; g+=32){
-	for(h = 0; h < M; h +=32){
-    for (j = h; j < 32+h; j+=8) {
-        for (i = g; i < 32+g; i+=8) {
-            for (k = 0; k < 8; k++){
-				for (l = 0; l < 8; l++){
+	b = 8 / (N / 32); 
+
+    for (j = 0; j < M; j+=b) {
+        for (i = 0; i < N; i+=b) {
+            for (k = 0; k < b; k++){
+				for (l = 0; l < b; l++){
 					B[j+k][i+l] = A[i+l][j+k];		
 				}
 			}
         }
-    }
-	}
 	}
 }
 
+char trans_desc_cont[] = "cont";
+void trans_cont(int M, int N, int A[N][M], int B[M][N])
+{
+
+    int b, c, d, i, j, k, l, o;
+
+	b = 8 / (N / 32);
+	o = 8 / b; 
+
+    for (j = 0; j < M; j+=8) {
+        for (i = 0; i < N; i+=8) {
+            for(c = 0; c < o; c++){
+			for(d = 0; d < o; d++){
+			for (k = 0; k < b; k++){
+				for (l = 0; l < b; l++){
+					B[j+k+(d*4)][i+l+(c*4)] = A[i+l+(c*4)][j+k+(d*4)];		
+				}
+			}
+			}
+			}
+        }
+	}
+}
 /*
  * registerFunctions - This function registers your transpose
  *     functions with the driver.  At runtime, the driver will
@@ -93,6 +132,8 @@ void registerFunctions()
 
     /* Register any additional transpose functions */
     registerTransFunction(trans, trans_desc);
+
+    registerTransFunction(trans_cont, trans_desc_cont);
 }
 
 /*
