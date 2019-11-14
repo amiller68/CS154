@@ -1,0 +1,11 @@
+amiller68 exam1 grade: 71/100
+
+  Question 1: 16 / 16
+  Question 2: 14 / 14
+  Question 3: 9 / 22
+  Question 4: 15 / 24
+  Question 5: 17 / 24
+
+Questions were graded by TAs and professors. If you believe a question
+was graded incorrectly, please drop by the exam office hour.
+
