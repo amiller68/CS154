@@ -1,0 +1,38 @@
+1)
+	   OL  P/C  CL  Forkret
+	A. 1   P    16  0
+	   2   P    23  101
+	   3   C    19  0
+	   4   P	8   101
+	   5   C    8   0
+	   6   C    10  0
+	   7   P    26  101
+
+	B. 1   P    16  0 
+	   2   P    23  101
+	   3   C	19  0
+	   4   C	8   0
+	   5   C	10	0
+	   6   P	26	101
+
+	   Race Condition: The kill() steps at lines 20 and 24 are in a race with each other; 
+					   if line 20 triggers first, the output is that of part A. 
+					   If line 24 triggers first the output is that of part B.
+	
+	C. 1   P	16  0
+	   2   P	23  101
+	   3   C	8   0
+	   4   C	10  0
+	   5   P    26  101
+
+	   Race Condition: The steps at lines 19 and 24 are in a race with each other;
+					   if line 19 triggers first, the output is that of part B. 
+					   If line 24 triggers first the output is that of part C.
+
+	D. 1  P	    16  0
+	   2  C		19  101
+	   3  P     8   0
+	   4  P     10  0
+
+	   Race Condition: The kill() step at line 20 is in a race with the binding of forkret to fork() (in the parent process) at line 18;
+					   if the kill signal at 20 triggers before the parent process can bind 0 to forkret, the parent process just exits and doesn't continue further
