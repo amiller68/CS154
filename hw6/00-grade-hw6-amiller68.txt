@@ -1,0 +1,21 @@
+amiller68 hw6 grade: 31/31
+
+Graded files from svn revision 55
+
+--------------------------------------
+Question 1 points and comments: 16/16
+
+Good job!
+
+Graded by: Hanson Lu (hansonlu)
+--------------------------------------
+
+Question 2 points and comments: 15/15
+
+Good job!
+
+Graded by: Hanson Lu (hansonlu)
+--------------------------------------
+
+If you believe there is an error in how you were graded, you have a week,
+starting from when this grade was returned, to notify us via email.
