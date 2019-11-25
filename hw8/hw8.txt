@@ -1,0 +1,21 @@
+1)
+	A. There is enough memory for P1; it will be loaded in address range 0-2 
+	B. There is enough memory for P2; it will be loaded in address range 6-8
+	C. There is NOT enough memory for P3; it will not be loaded, n/a
+	D. P1 fragmentation: 3MB - 1MB  =  2MB
+	   P2 fragmentation: 3MB - 2MB  =  1MB
+	   P3 fragmentation: n/a
+	   +----------------------------------	
+	   Total Internal Fragmentatiom =  3MB 
+	E. There is unused space at addresses 3, 4, & 9. The External Frangmentation is therefore 3MB
+
+2)
+	A.
+		r 0xF4 = 1 | 1110100 ; 0x13 + 0x74 = 0x87 (S)
+		w 0x38 = 0 | 0111000 ; 0x9A + 0x38 = 0xD2 (E)
+		r 0x12 = 0 | 0010010 ; 0x9A + 0x12 = 0xAC (S)
+	
+	B. The largest possible size of a segment in this architecture is 2^7 bytes.
+		
+
+
