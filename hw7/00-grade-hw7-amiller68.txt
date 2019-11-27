@@ -1,0 +1,15 @@
+amiller68 hw7 grade: 19/20
+
+Graded files from svn revision 65
+
+--------------------------------------
+Question 1 points and comments: 19/20
+
+For part D, the value of forkret at line 2 is actually 0, and at line 3 you needed to specify that
+this was the parent.
+
+Graded by: Rose Pierce (rosepierce)
+--------------------------------------
+
+If you believe there is an error in how you were graded, you have a week,
+starting from when this grade was returned, to notify us via email.
