@@ -253,10 +253,8 @@ void exec(char **args, int r_flag, char *red_path)
 
 		while((read(fd[0], buf, 1)) > 0){
 		//fflush(out_fd);
-			if(*buf != '\n') write(out_fd, buf, 1);
-			else write(out_fd, " ", 1);
+			write(out_fd, buf, 1);
 		}
-		write(out_fd, "\n", 1);
 		if(r_flag == 2){
 			temp = open("tmp", O_RDONLY, S_IRUSR | S_IWUSR);
 			while((read(temp, buf, 1)) > 0){
