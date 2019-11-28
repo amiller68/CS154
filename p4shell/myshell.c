@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <libgen.h>
 
 void ERROR(){
 	char error_message[30] = "An error has occurred\n";
@@ -33,7 +34,8 @@ int main(int argc, char *argv[])
 {
 
 	if(argc > 2){ERROR(); exit(2); }
-	char cmd_buff[513];
+	//512 char plus newline plus null
+	char cmd_buff[514];
 	char *cmd;
 	char *pinput;
 	char *save;
@@ -56,6 +58,7 @@ int main(int argc, char *argv[])
 	while (1) {
 		
 		if(batch){
+batch_top:
 			if((read = getline(&line, &len, batch)) == -1) break;
 
 			int i = 0;
@@ -67,27 +70,35 @@ int main(int argc, char *argv[])
 				i++;	
 			}
 
-			strncpy(cmd_buff, line, 512);
-			if(len > 512){
-				cmd_buff[512] = '\0'; //null terminating if none
-				ERROR();
+			strncpy(cmd_buff, line, 514);
+			char *cut;
+			if((cut = strchr(cmd_buff, '\n'))){
+				*cut = '\0';
 			}
 			else {
-				//Null terminate at newline
-				char *cut = strchr(cmd_buff, '\n');
-				*cut = '\0';
+				ERROR();
+	//			while(fgetc(stdin)!='\n');
+				goto batch_top;
 			}
 		}
 		
 		else{
+shell_top:
 			myPrint("myshell> ");
-			pinput = fgets(cmd_buff, 513, stdin);
+			pinput = fgets(cmd_buff, 514, stdin);
 			if (!pinput) {
 				ERROR();
 				exit(2);
 			}
-			char *cut = strchr(cmd_buff, '\n');
-			*cut = '\0';
+			char *cut;
+			if((cut = strchr(cmd_buff, '\n'))){
+				*cut = '\0';
+			}
+			else {
+				ERROR();
+				while(fgetc(stdin)!='\n');
+				goto shell_top;
+			}
 		}
 
 		pinput = cmd_buff;
@@ -126,8 +137,10 @@ int main(int argc, char *argv[])
 
 				else {
 				// need to implement null args 1 for home
-					if( args[1] ) chdir(args[1]);
+					int er;
+					if( args[1] ) er = chdir(args[1]);
 					else chdir(getenv("HOME"));
+					if(er) ERROR();
 				}
 			}
 
@@ -185,13 +198,8 @@ void parse(char *cmd, char **args, int *r_flag, char **red_path)
 void exec(char **args, int r_flag, char *red_path)
 {
 
-
-	//dont execute null arguments
-//	if(args[0] == NULL) exit(0);
-//	myPrint(args[0]); myPrint(args[1]);
-	
 	pid_t p;
-	int stat;
+	int status;
 
 	//by Default, just put it onto STDOUT
 	int out_fd = dup(1);
@@ -229,6 +237,20 @@ void exec(char **args, int r_flag, char *red_path)
 		close(fd[1]);
 		char buf[1];
 		int temp;
+		if(r_flag){
+		//	myPrint(args[0]);
+			if(args[0] == '\0'){
+				ERROR();
+				goto end;
+			}
+			struct stat s;
+			int no_dir;
+			no_dir = stat(dirname(red_path), &s);
+			if(no_dir){
+				ERROR();
+				goto end;
+			}
+		}
 		if(r_flag == 1){
 			if(red_path && access(red_path, F_OK)){
 				out_fd = open(red_path, O_CREAT | O_WRONLY, 0664);
@@ -277,7 +299,7 @@ void exec(char **args, int r_flag, char *red_path)
 	end:
 		close(fd[0]);
 		close(out_fd);
-		while (waitpid(p, &stat, 0) != p);
+		while (waitpid(p, &status, 0) != p);
 	}
 
 }
