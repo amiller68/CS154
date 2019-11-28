@@ -3,7 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <limits.h>
-#include  <sys/wait.h>
+#include <ctype.h>
+#include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -56,6 +57,16 @@ int main(int argc, char *argv[])
 		
 		if(batch){
 			if((read = getline(&line, &len, batch)) == -1) break;
+
+			int i = 0;
+			while(line[i] != '\n'){
+				if((line[i] != ' ') && (line[i] != '	')){
+					myPrint(line);
+					break;
+				}
+				i++;	
+			}
+
 			strncpy(cmd_buff, line, 512);
 			if(len > 512){
 				cmd_buff[512] = '\0'; //null terminating if none
@@ -66,8 +77,6 @@ int main(int argc, char *argv[])
 				char *cut = strchr(cmd_buff, '\n');
 				*cut = '\0';
 			}
-			
-			myPrint(cmd_buff); myPrint("\n");
 		}
 		
 		else{
@@ -84,13 +93,13 @@ int main(int argc, char *argv[])
 		pinput = cmd_buff;
 
 		cmd = strtok_r(pinput, ";", &save);
-
+//		cmd = strtok(cmd, " 	");
 		while(cmd != NULL){
 
 			//puts cmd into terms exec can run
 			parse(cmd, args, &r_flag, &red_path);
 			//if no redirect, should return NULL
-
+			if(args[0] == NULL){goto end;}
 			if (strcmp(args[0],"exit") == 0) {
 				if( args[1] || r_flag ) {
 					ERROR();
@@ -125,6 +134,7 @@ int main(int argc, char *argv[])
 			else {
 				exec(args, r_flag, red_path);
 			}
+end:
 			cmd = strtok_r(NULL, ";", &save);
 		}
     }
@@ -160,7 +170,7 @@ void parse(char *cmd, char **args, int *r_flag, char **red_path)
 	cmd = strtok(cmd, ">");
 	//if no leading whitespace, gets first arg
 	//If nothing but whitespace; returns NULL
-	path = strtok(cmd, " "); // get first arg of cmd
+	path = strtok(cmd, "	 "); // get first arg of cmd
 	args[c] = path;
 	//if path is null; first cmd is null
 	while(path != NULL){
@@ -177,7 +187,8 @@ void exec(char **args, int r_flag, char *red_path)
 
 
 	//dont execute null arguments
-	if(*args == NULL) exit(0);
+//	if(args[0] == NULL) exit(0);
+//	myPrint(args[0]); myPrint(args[1]);
 	
 	pid_t p;
 	int stat;
