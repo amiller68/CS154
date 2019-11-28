@@ -51,6 +51,10 @@ int main(int argc, char *argv[])
 	ssize_t read;
 	
 	if (argc == 2) {
+		if(access(argv[1], F_OK)){
+			ERROR();
+			exit(2);
+		}
 		batch = fopen(argv[1], "r");
 		if(!batch) exit(2);
 	}
@@ -110,7 +114,10 @@ shell_top:
 			//puts cmd into terms exec can run
 			parse(cmd, args, &r_flag, &red_path);
 			//if no redirect, should return NULL
-			if(args[0] == NULL){goto end;}
+			if(args[0] == NULL){
+				if(r_flag) ERROR();
+				goto end;
+			}
 			if (strcmp(args[0],"exit") == 0) {
 				if( args[1] || r_flag ) {
 					ERROR();
@@ -164,41 +171,63 @@ void parse(char *cmd, char **args, int *r_flag, char **red_path)
 	
 	if((*red_path = strstr(cmd, ">+")))
 	{
-		*red_path = strtok(*red_path, ">");
-		*red_path = strtok(*red_path, "+");
-		*red_path = strtok(*red_path, " ");
-		if((strtok(NULL, " "))) ERROR(); //accounts for extra words
+	//	*red_path = strtok(*red_path, ">");
+	//	*red_path = strtok(*red_path, "+");
+		*red_path += 2;
+		*red_path = strtok(*red_path, " 	");
 		*r_flag = 2;
+		if((strtok(NULL, " 	"))){
+//			ERROR(); //accounts for extra words
+			args[c] = NULL;
+			red_path = NULL;
+			goto parse_end;
+		}
 	}
 	
 	//find redirection in line
 	else if( (*red_path = strstr(cmd, ">")) ) //if redi exists
 	{
-		*red_path = strtok(*red_path, ">");
-		*red_path = strtok(*red_path, " ");
+	//	*red_path = strtok(*red_path, ">");
+//		myPrint("Theres a simple redi\n");
+		*red_path += 1;
+		*red_path = strtok(*red_path, " 	");
+	//	myPrint(*red_path); myPrint("\n");
 		*r_flag = 1;
-		if((strtok(NULL, " "))) ERROR(); //accounts for extra words
+		if((strtok(NULL, "	 "))){
+//			ERROR(); //accounts for extra words
+			args[c] = NULL;
+			red_path = NULL;
+			goto parse_end;
+		}
 	}
 
-	cmd = strtok(cmd, ">");
-	//if no leading whitespace, gets first arg
-	//If nothing but whitespace; returns NULL
-	path = strtok(cmd, "	 "); // get first arg of cmd
+	//Edge case of no space
+	if(*cmd == '>'){
+		path = NULL;
+	}
+	
+	else {
+		cmd = strtok(cmd, ">");
+		//if no leading whitespace, gets first arg
+		//If nothing but whitespace; returns NULL
+		path = strtok(cmd, " 	"); // get first arg of cmd
+	}
+
 	args[c] = path;
 	//if path is null; first cmd is null
 	while(path != NULL){
 		args[c++] = path;
-		path = strtok(NULL, " ");	
+		path = strtok(NULL, " 	");	
 	}	
-
-	args[c++] = NULL; //add terminating char	
+parse_end:
+	args[c++] = NULL; //add terminating char
 }
 
 
 void exec(char **args, int r_flag, char *red_path)
 {
-
 	pid_t p;
+
 	int status;
 
 	//by Default, just put it onto STDOUT
@@ -220,15 +249,24 @@ void exec(char **args, int r_flag, char *red_path)
 
 	//Succesful Fork; Child
 	else if(p == 0){
+		int err_save = dup(2);
+		int err_rt = open("/dev/null", O_WRONLY);
+		if(r_flag){
+			dup2(err_rt, 2);
+		}
+	
+		close(err_rt);
 		close(fd[0]);
 		dup2(fd[1], STDOUT_FILENO);
 		close(fd[1]);
 		if(execvp(args[0], args) < 0){
 			ERROR();
+			dup2(out_fd, STDOUT_FILENO);
 			exit(2);
 		}
 		//Once done, make sure STDOUT returned to normal
 		dup2(out_fd, STDOUT_FILENO);
+		dup2(err_save, STDERR_FILENO);
 		exit(0);
 	}
 	
@@ -238,11 +276,6 @@ void exec(char **args, int r_flag, char *red_path)
 		char buf[1];
 		int temp;
 		if(r_flag){
-		//	myPrint(args[0]);
-			if(args[0] == '\0'){
-				ERROR();
-				goto end;
-			}
 			struct stat s;
 			int no_dir;
 			no_dir = stat(dirname(red_path), &s);
