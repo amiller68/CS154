@@ -15,11 +15,6 @@ void ERROR(){
 	write(STDOUT_FILENO, error_message, strlen(error_message));
 }
 
-//Exit Codes:
-// 0 = All Good;
-// 1 = Bad Input;
-// 2 = System Error
-
 void myPrint(char *msg)
 {
     write(STDOUT_FILENO, msg, strlen(msg));
@@ -108,7 +103,6 @@ shell_top:
 		pinput = cmd_buff;
 
 		cmd = strtok_r(pinput, ";", &save);
-//		cmd = strtok(cmd, " 	");
 		while(cmd != NULL){
 
 			//puts cmd into terms exec can run
@@ -171,13 +165,10 @@ void parse(char *cmd, char **args, int *r_flag, char **red_path)
 	
 	if((*red_path = strstr(cmd, ">+")))
 	{
-	//	*red_path = strtok(*red_path, ">");
-	//	*red_path = strtok(*red_path, "+");
 		*red_path += 2;
 		*red_path = strtok(*red_path, " 	");
 		*r_flag = 2;
 		if((strtok(NULL, " 	"))){
-//			ERROR(); //accounts for extra words
 			args[c] = NULL;
 			red_path = NULL;
 			goto parse_end;
@@ -187,14 +178,10 @@ void parse(char *cmd, char **args, int *r_flag, char **red_path)
 	//find redirection in line
 	else if( (*red_path = strstr(cmd, ">")) ) //if redi exists
 	{
-	//	*red_path = strtok(*red_path, ">");
-//		myPrint("Theres a simple redi\n");
 		*red_path += 1;
 		*red_path = strtok(*red_path, " 	");
-	//	myPrint(*red_path); myPrint("\n");
 		*r_flag = 1;
 		if((strtok(NULL, "	 "))){
-//			ERROR(); //accounts for extra words
 			args[c] = NULL;
 			red_path = NULL;
 			goto parse_end;
@@ -318,7 +305,6 @@ void exec(char **args, int r_flag, char *red_path)
 		}
 
 		while((read(fd[0], buf, 1)) > 0){
-		//fflush(out_fd);
 			write(out_fd, buf, 1);
 		}
 		if(r_flag == 2){
