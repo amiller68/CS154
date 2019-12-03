@@ -4,7 +4,7 @@
 	   Therfore, when the parent closes its copy of the FD, the FD strcuture is removed from memory, eliminating memory leaks
 
 2)
-				Main?	T0?		T1?
+	       		Main?	T0?		T1?
 	cnt.t0 		N		Y		N	
 	cnt.t1 		N		N		Y
 	i.m    		Y		Y		Y
