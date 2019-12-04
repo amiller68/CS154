@@ -1,0 +1,15 @@
+amiller68 exam2 grade: 78/100
+
+  Question 1: 34 / 40
+  Question 2: 6 / 10
+  Question 3: 1 / 10
+  Question 4: 10 / 10
+  Question 5: 10 / 10
+  Question 6: 8 / 10
+  Question 7: 4 / 5
+  Question 8: 5 / 5
+
+Questions were graded by TAs and professors. If you believe a question
+was graded incorrectly, post a private note in the "exam2" Piazza
+folder to identify the question number, and the grading error.
+
