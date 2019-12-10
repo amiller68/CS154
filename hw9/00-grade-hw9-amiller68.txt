@@ -1,0 +1,26 @@
+amiller68 hw9 grade: 47/49
+
+Graded files from svn revision 84
+
+--------------------------------------
+Question 1 points and comments: 14/16
+
+-2 Part A should be 50 * 100 = 5000 bytes. Possibly a typo?
+
+Graded by: Hanson Lu (hansonlu)
+--------------------------------------
+
+Question 2 points and comments: 18/18
+
+Graded by: Henry Filosa (hfilosa)
+--------------------------------------
+
+Question 3 points and comments: 15/15
+
+Great job!
+
+Graded by: Rose Pierce (rosepierce)
+--------------------------------------
+
+If you believe there is an error in how you were graded, you have a week,
+starting from when this grade was returned, to notify us via email.
