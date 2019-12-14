@@ -1,0 +1,42 @@
+amiller68 cs154 grade: 87.269 (normalized: 87.269 )
+
+Homeworks:
+       hw1 (2.75%):     21/22 == 2.6249
+       hw2 (2.75%):     30/34 == 2.4264
+       hw3 (2.75%):     32/32 == 2.7500
+       hw4 (2.75%):     52/55 == 2.5999
+       hw5 (2.75%):     20/20 == 2.7500
+       hw6 (2.75%):     31/31 == 2.7500
+       hw7 (2.75%):     19/20 == 2.6125
+       hw8 (2.75%):     40/40 == 2.7500
+       hw9 (2.75%):     47/49 == 2.6377
+                     -------------------
+                 raw hw sum   == 23.901
+        (dropping lowest: hw2 == 2.4264)
+    hw avg   (22%):           == 21.475
+
+Projects:
+p1bitmanip  (6.6%):   103/103 == 6.6000
+    p2bomb  (6.6%):     59/60 == 6.4899
+   p3cache  (6.6%):  94.6/100 == 6.2436
+   p4shell  (6.6%):   100/100 == 6.6000
+  p5malloc  (6.6%):    96/100 == 6.3360
+
+Exams:
+     exam1 (22.5%):    71/100 == 15.975
+     exam2 (22.5%):    78/100 == 17.550
+
+(Current weighted score, based on 100.0% of assignments)
+   OVERALL (100.0%):           == 87.269
+
+(Current normalized score, 100/100.0 * currentOverall)
+NORMALIZED  (100%):           == 87.269
+
+
+
+
+The OVERALL score is the total score you've earned.  The NORMALIZED
+score is the score as if the quarter ends today (normalized to 100%
+work done). At the end of the quarter, the OVERALL score will be the
+same as the NORMALIZED score.
+
